@@ -1,0 +1,193 @@
+---
+title: "NHL Shot Position Analysis"
+author: "Andrew Lucas"
+format: html
+---
+
+```{=html}
+<style>
+  .welcome {
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 3rem 1rem 1rem 1rem;
+  }
+  .welcome h1 { font-size: 2rem; margin-bottom: 0.8rem; }
+  .welcome p { font-size: 1.05rem; color: #555; line-height: 1.7; max-width: 600px; margin: 0 auto; }
+  .nav-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 600px;
+    margin: 3rem auto;
+  }
+  .nav-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1.8rem 1.2rem;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .nav-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+  }
+  .nav-card h3 { margin: 0 0 0.5rem 0; font-size: 1.15rem; }
+  .nav-card p { font-size: 0.9rem; color: #777; margin: 0; }
+</style>
+```
+
+```{=html}
+<div class="welcome">
+<h1>NHL Shot Position Analysis</h1>
+<p>
+  Where do NHL shots come from, and what makes a shot dangerous?
+  This project explores over 2 million shot attempts across 19 seasons (2007–2025)
+  to find out.
+</p>
+</div>
+```
+
+```{=html}
+<div class="nav-cards">
+  <a href="story.qmd" class="nav-card">
+    <h3>The Story</h3>
+    <p>A data-driven narrative exploring shot patterns, player positions, and where goals really come from.</p>
+  </a>
+  <a href="exploration.qmd" class="nav-card">
+    <h3>Explore the Data</h3>
+    <p>Interactive shot maps broken down by season and player position. Filter, compare, and dig in.</p>
+  </a>
+</div>
+```
+
+```{=html}
+<div style="max-width:700px; margin:2rem auto; text-align:center;">
+<h2 style="font-size:1.3rem; margin-bottom:0.5rem;">Shot Map Preview</h2>
+```
+
+```{r}
+#| label: preview-packages
+#| echo: false
+#| message: false
+#| warning: false
+library(data.table)
+library(ggplot2)
+```
+
+```{r}
+#| label: preview-load-data
+#| echo: false
+#| message: false
+#| warning: false
+shots_raw <- fread("data/shots_2025.csv",
+                   select = c("arenaAdjustedXCord", "arenaAdjustedYCord",
+                              "playerPositionThatDidEvent", "event"))
+```
+
+```{r}
+#| label: preview-prepare-data
+#| echo: false
+shots <- shots_raw[
+  event %in% c("SHOT", "GOAL") &
+  playerPositionThatDidEvent %in% c("C", "D", "L", "R")
+]
+
+shots[, position_label := fcase(
+  playerPositionThatDidEvent == "C", "Center",
+  playerPositionThatDidEvent == "D", "Defense",
+  playerPositionThatDidEvent == "L", "Left Wing",
+  playerPositionThatDidEvent == "R", "Right Wing"
+)]
+
+set.seed(42)
+shots_sample <- shots[sample(.N, max(1, floor(.N * 0.10)))]
+```
+
+```{r}
+#| label: preview-shot-map
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 6.5
+pos_colors <- c("Center" = "#E74C3C", "Defense" = "#3498DB",
+                 "Left Wing" = "#2ECC71", "Right Wing" = "#9B59B6")
+
+rink_lines <- data.frame(
+  x = c(-100, 100, 0, 0, 25, 25, -25, -25, 89, 89, -89, -89),
+  xend = c(-100, 100, 0, 0, 25, 25, -25, -25, 89, 89, -89, -89),
+  y = c(-42.5, -42.5, -42.5, 42.5, -42.5, 42.5, -42.5, 42.5, -42.5, 42.5, -42.5, 42.5),
+  yend = c(42.5, 42.5, -42.5, 42.5, -42.5, 42.5, -42.5, 42.5, -42.5, 42.5, -42.5, 42.5),
+  color = c("#888", "#888", rep("#C0392B", 2), rep("#2980B9", 4), rep("#C0392B", 4)),
+  linewidth = c(2, 2, rep(2.5, 2), rep(2.5, 4), rep(1.5, 4))
+)
+
+circle_path <- function(cx, cy, r, n = 100) {
+  theta <- seq(0, 2 * pi, length.out = n)
+  data.frame(x = cx + r * cos(theta), y = cy + r * sin(theta))
+}
+
+faceoff_top    <- circle_path(69, 22, 15)
+faceoff_bot    <- circle_path(69, -22, 15)
+faceoff_top_l  <- circle_path(-69, 22, 15)
+faceoff_bot_l  <- circle_path(-69, -22, 15)
+crease_r       <- circle_path(89, 0, 6)
+crease_l       <- circle_path(-89, 0, 6)
+
+ggplot() +
+  geom_rect(aes(xmin = -100, xmax = 100, ymin = -42.5, ymax = 42.5),
+            fill = "#DBE8F5", color = "#888", linewidth = 1.2) +
+  geom_segment(data = rink_lines,
+               aes(x = x, xend = xend, y = y, yend = yend,
+                   color = color, linewidth = linewidth),
+               show.legend = FALSE) +
+  scale_color_identity() +
+  scale_linewidth_identity() +
+  geom_polygon(data = faceoff_top, aes(x = x, y = y),
+               fill = NA, color = "#C0392B", linewidth = 0.8, linetype = "dotted") +
+  geom_polygon(data = faceoff_bot, aes(x = x, y = y),
+               fill = NA, color = "#C0392B", linewidth = 0.8, linetype = "dotted") +
+  geom_polygon(data = faceoff_top_l, aes(x = x, y = y),
+               fill = NA, color = "#C0392B", linewidth = 0.8, linetype = "dotted") +
+  geom_polygon(data = faceoff_bot_l, aes(x = x, y = y),
+               fill = NA, color = "#C0392B", linewidth = 0.8, linetype = "dotted") +
+  geom_polygon(data = crease_r, aes(x = x, y = y),
+               fill = alpha("#2980B9", 0.08), color = "#2980B9", linewidth = 1) +
+  geom_polygon(data = crease_l, aes(x = x, y = y),
+               fill = alpha("#2980B9", 0.08), color = "#2980B9", linewidth = 1) +
+  geom_point(data = shots_sample,
+             aes(x = arenaAdjustedXCord, y = arenaAdjustedYCord, color = position_label),
+             size = 1.2, alpha = 0.45) +
+  scale_color_manual(values = pos_colors, name = "Position") +
+  coord_equal(xlim = c(-100, 100), ylim = c(-55, 55)) +
+  labs(title = "NHL Shot Positions — 2025 Season", x = NULL, y = NULL) +
+  theme_void() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5, margin = margin(b = 5)),
+    legend.position = "right",
+    legend.title = element_text(size = 11),
+    legend.text = element_text(size = 10),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+```
+
+```{=html}
+<p style="font-size:0.9rem; color:#888; margin-top:0.5rem;">
+  Shot locations for the 2025 season.
+  <a href="exploration.qmd">Explore all seasons interactively &rarr;</a>
+</p>
+</div>
+```
+
+```{=html}
+<div style="max-width:600px; margin:2rem auto; text-align:center; font-size:0.95rem; color:#888; line-height:1.7;">
+  <p>
+    Shot data is sourced from <a href="https://moneypuck.com">MoneyPuck</a> and includes
+    all shot attempts (shots on goal, missed shots, blocked shots) as well as goals.
+    Positions covered: Center, Defense, Left Wing, and Right Wing.
+  </p>
+</div>
+```

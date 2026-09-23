@@ -1,0 +1,241 @@
+---
+title: "Exploration"
+author: "Andrew Lucas"
+format: html
+execute:
+  echo: false
+---
+
+## Explore NHL Shot Data by Season
+
+Dive into 19 seasons of NHL shot data (2007–2025). Select a season from the dropdown to see where shots originate on the ice for that year. The **heatmap** shows shot density — brighter areas mean more shots come from there. The **scatter points** show individual shot locations, colored by player position.
+
+**How to use this page:**
+
+- **Season dropdown** (top-left) — Switch between any season from 2007 to 2025, or select "All Seasons" to see everything at once.
+- **Legend** — Click a position name in the legend to toggle it on or off.
+- **Hover** — Hover over any point or heatmap cell for details.
+
+::: {.callout-note}
+Shot data is sourced from MoneyPuck and includes all shot attempts (shots on goal, missed shots, and blocked shots) as well as goals. Positions shown are Center, Defense, Left Wing, and Right Wing.
+:::
+
+```{r}
+#| label: packages
+#| message: false
+#| warning: false
+library(data.table)
+library(hexbin)
+library(plotly)
+```
+
+```{r}
+#| label: load-data
+#| message: false
+#| warning: false
+#| cache: true
+seasons <- 2007:2025
+files <- file.path("data", paste0("shots_", seasons, ".csv"))
+
+shots_raw <- rbindlist(lapply(files, function(f) {
+  fread(f, select = c("arenaAdjustedXCord", "arenaAdjustedYCord",
+                       "playerPositionThatDidEvent", "season", "event"))
+}))
+```
+
+```{r}
+#| label: prepare-data
+shots <- shots_raw[
+  event %in% c("SHOT", "GOAL") &
+  playerPositionThatDidEvent %in% c("C", "D", "L", "R")
+]
+
+shots[, position_label := fcase(
+  playerPositionThatDidEvent == "C", "Center",
+  playerPositionThatDidEvent == "D", "Defense",
+  playerPositionThatDidEvent == "L", "Left Wing",
+  playerPositionThatDidEvent == "R", "Right Wing"
+)]
+```
+
+```{r}
+#| label: shot-map
+#| fig-width: 8
+#| fig-height: 6.5
+#| message: false
+#| warning: false
+
+pos_colors <- c("Center" = "#E74C3C", "Defense" = "#3498DB",
+                 "Left Wing" = "#2ECC71", "Right Wing" = "#9B59B6")
+pos_names <- c("Center", "Defense", "Left Wing", "Right Wing")
+
+# Pre-compute hexbin + scatter per season
+hex_season <- list()
+scat_season <- list()
+
+for (s in seasons) {
+  d <- shots[season == s]
+  d_hex <- list()
+  d_scat <- list()
+  for (i in seq_along(pos_names)) {
+    dp <- d[position_label == pos_names[i]]
+    if (nrow(dp) == 0) {
+      d_hex[[i]] <- data.frame(x = numeric(0), y = numeric(0), count = numeric(0))
+      d_scat[[i]] <- dp
+    } else {
+      y_max <- max(abs(dp$arenaAdjustedYCord), na.rm = TRUE) + 5
+      hb <- hexbin(dp$arenaAdjustedXCord, dp$arenaAdjustedYCord,
+                   xbnds = c(-100, 100), ybnds = c(-y_max, y_max),
+                   xbins = 40, IDs = TRUE)
+      d_hex[[i]] <- data.frame(x = hb@xcm, y = hb@ycm, count = hb@count)
+      set.seed(42)
+      d_scat[[i]] <- dp[sample(.N, max(1, floor(.N * 0.10)))]
+    }
+  }
+  hex_season[[as.character(s)]] <- d_hex
+  scat_season[[as.character(s)]] <- d_scat
+}
+
+# Global zmax for consistent color scale across seasons
+all_counts <- unlist(lapply(hex_season, function(season) {
+  unlist(lapply(season, function(h) h$count))
+}))
+global_cmax <- max(all_counts, na.rm = TRUE)
+
+# Rink shapes
+rink_shapes <- list(
+  list(type = "rect", x0 = -100, x1 = 100, y0 = -42.5, y1 = 42.5,
+       fillcolor = "rgba(219,232,245,1)", line = list(color = "#888", width = 2),
+       layer = "below"),
+  list(type = "line", x0 = 0, x1 = 0, y0 = -42.5, y1 = 42.5,
+       line = list(color = "#C0392B", width = 2.5), layer = "below"),
+  list(type = "line", x0 = 25, x1 = 25, y0 = -42.5, y1 = 42.5,
+       line = list(color = "#2980B9", width = 2.5), layer = "below"),
+  list(type = "line", x0 = -25, x1 = -25, y0 = -42.5, y1 = 42.5,
+       line = list(color = "#2980B9", width = 2.5), layer = "below"),
+  list(type = "line", x0 = 89, x1 = 89, y0 = -42.5, y1 = 42.5,
+       line = list(color = "#C0392B", width = 1.5), layer = "below"),
+  list(type = "line", x0 = -89, x1 = -89, y0 = -42.5, y1 = 42.5,
+       line = list(color = "#C0392B", width = 1.5), layer = "below"),
+  list(type = "circle", x0 = 83, x1 = 95, y0 = -6, y1 = 6,
+       line = list(color = "#2980B9", width = 1.5), fillcolor = "rgba(41,128,185,0.08)",
+       layer = "below"),
+  list(type = "circle", x0 = -95, x1 = -83, y0 = -6, y1 = 6,
+       line = list(color = "#2980B9", width = 1.5), fillcolor = "rgba(41,128,185,0.08)",
+       layer = "below"),
+  list(type = "circle", x0 = 54, x1 = 84, y0 = -37, y1 = -7,
+       line = list(color = "#C0392B", width = 1.2, dash = "dot"),
+       fillcolor = "rgba(0,0,0,0)", layer = "below"),
+  list(type = "circle", x0 = 54, x1 = 84, y0 = 7, y1 = 37,
+       line = list(color = "#C0392B", width = 1.2, dash = "dot"),
+       fillcolor = "rgba(0,0,0,0)", layer = "below"),
+  list(type = "circle", x0 = -84, x1 = -54, y0 = -37, y1 = -7,
+       line = list(color = "#C0392B", width = 1.2, dash = "dot"),
+       fillcolor = "rgba(0,0,0,0)", layer = "below"),
+  list(type = "circle", x0 = -84, x1 = -54, y0 = 7, y1 = 37,
+       line = list(color = "#C0392B", width = 1.2, dash = "dot"),
+       fillcolor = "rgba(0,0,0,0)", layer = "below")
+)
+
+# Color scale for heatmap
+hc <- list(list(0, "#FFFFCC"), list(0.15, "#FED976"),
+           list(0.35, "#FD8D3C"), list(0.55, "#E31A1C"),
+           list(0.75, "#BD0026"), list(1, "#800026"))
+
+# Build all traces
+p <- plot_ly(width = 800, height = 650)
+
+for (s in seasons) {
+  s_key <- as.character(s)
+  hx <- hex_season[[s_key]]
+  sc <- scat_season[[s_key]]
+
+  for (i in 1:4) {
+    p <- p %>% add_heatmap(
+      x = hx[[i]]$x, y = hx[[i]]$y, z = hx[[i]]$count,
+      colorscale = hc, zmin = 0, zmax = global_cmax,
+      showscale = FALSE, showlegend = FALSE,
+      hovertemplate = paste0(pos_names[i], ": %{z} shots<br>X: %{x:.0f} ft<br>Y: %{y:.0f} ft<extra></extra>")
+    )
+  }
+
+  for (i in 1:4) {
+    p <- p %>% add_markers(
+      data = sc[[i]],
+      x = ~arenaAdjustedXCord, y = ~arenaAdjustedYCord,
+      marker = list(color = pos_colors[pos_names[i]], size = 5, opacity = 0.45,
+                    line = list(color = "white", width = 0.3)),
+      name = pos_names[i],
+      hovertemplate = paste0(pos_names[i], "<br>X: %{x:.0f} ft<br>Y: %{y:.0f} ft<extra></extra>")
+    )
+  }
+}
+
+# Set initial visibility: only show the most recent season
+p <- plotly_build(p)
+most_recent <- as.character(max(seasons))
+for (idx in seq_along(seasons)) {
+  s_key <- as.character(seasons[idx])
+  is_vis <- s_key == most_recent
+  start <- (idx - 1) * 8 + 1
+  end <- idx * 8
+  for (t in start:end) {
+    p$x$data[[t]]$visible <- is_vis
+  }
+}
+
+# Season dropdown buttons
+n_per_season <- 8
+total_traces <- n_per_season * length(seasons)
+
+# "All Seasons" button — show everything
+all_vis <- as.list(rep(TRUE, total_traces))
+all_button <- list(method = "restyle", label = "All Seasons",
+                   args = list("visible", all_vis))
+
+# Per-season buttons
+season_buttons <- lapply(seq_along(seasons), function(idx) {
+  vis <- rep(FALSE, total_traces)
+  start <- (idx - 1) * n_per_season + 1
+  end <- idx * n_per_season
+  vis[start:end] <- TRUE
+  list(method = "restyle", label = as.character(seasons[idx]),
+       args = list("visible", as.list(vis)))
+})
+
+all_buttons <- c(list(all_button), season_buttons)
+
+p <- p %>% layout(
+  title = list(
+    text = "NHL Shot Positions by Season",
+    font = list(size = 18, family = "Arial"),
+    x = 0.5, xanchor = "center"
+  ),
+  xaxis = list(title = "", range = c(-100, 100), zeroline = FALSE,
+               showgrid = FALSE, scaleanchor = "y", scaleratio = 1,
+               showticklabels = FALSE, fixedrange = TRUE),
+  yaxis = list(title = "", range = c(-55, 55), zeroline = FALSE,
+               showgrid = FALSE, showticklabels = FALSE, fixedrange = TRUE),
+  legend = list(
+    title = list(text = "Position", font = list(size = 12)),
+    font = list(size = 11),
+    bgcolor = "rgba(255,255,255,0.9)",
+    bordercolor = "#ccc", borderwidth = 1,
+    x = 1.02, y = 1, xanchor = "left"
+  ),
+  margin = list(t = 60, b = 40, l = 10, r = 110),
+  plot_bgcolor = "rgba(219,232,245,1)",
+  paper_bgcolor = "white",
+  shapes = rink_shapes,
+  updatemenus = list(
+    list(
+      type = "dropdown", x = 0.0, y = 1.12, xanchor = "left", yanchor = "top",
+      bgcolor = "white", bordercolor = "#aaa", borderwidth = 1,
+      font = list(size = 12),
+      buttons = all_buttons
+    )
+  )
+)
+
+p
+```
