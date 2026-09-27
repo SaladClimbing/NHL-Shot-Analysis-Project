@@ -5,41 +5,6 @@ format: html
 ---
 
 ```{=html}
-<style>
-  .welcome {
-    max-width: 720px;
-    margin: 0 auto;
-    text-align: center;
-    padding: 3rem 1rem 1rem 1rem;
-  }
-  .welcome h1 { font-size: 2rem; margin-bottom: 0.8rem; }
-  .welcome p { font-size: 1.05rem; color: #555; line-height: 1.7; max-width: 600px; margin: 0 auto; }
-  .nav-cards {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    max-width: 600px;
-    margin: 3rem auto;
-  }
-  .nav-card {
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 10px;
-    padding: 1.8rem 1.2rem;
-    text-decoration: none;
-    color: inherit;
-    transition: box-shadow 0.2s, transform 0.2s;
-  }
-  .nav-card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-    transform: translateY(-2px);
-  }
-  .nav-card h3 { margin: 0 0 0.5rem 0; font-size: 1.15rem; }
-  .nav-card p { font-size: 0.9rem; color: #777; margin: 0; }
-</style>
-```
-
-```{=html}
 <div class="welcome">
 <h1>NHL Shot Position Analysis</h1>
 <p>
@@ -64,7 +29,7 @@ format: html
 ```
 
 ```{=html}
-<div style="max-width:700px; margin:2rem auto; text-align:center;">
+<div class="section-label">
 <h2 style="font-size:1.3rem; margin-bottom:0.5rem;">Shot Map Preview</h2>
 ```
 
@@ -175,7 +140,7 @@ ggplot() +
 ```
 
 ```{=html}
-<p style="font-size:0.9rem; color:#888; margin-top:0.5rem;">
+<p class="preview-caption">
   Shot locations for the 2025 season.
   <a href="exploration.qmd">Explore all seasons interactively &rarr;</a>
 </p>
@@ -183,7 +148,7 @@ ggplot() +
 ```
 
 ```{=html}
-<div style="max-width:600px; margin:2rem auto; text-align:center; font-size:0.95rem; color:#888; line-height:1.7;">
+<div class="source-note">
   <p>
     Shot data is sourced from <a href="https://moneypuck.com">MoneyPuck</a> and includes
     all shot attempts (shots on goal, missed shots, blocked shots) as well as goals.

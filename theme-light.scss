@@ -1,0 +1,53 @@
+/*-- scss:defaults --*/
+
+// Hockey-inspired light theme layered on cosmo
+$body-bg: #f4f8fc;
+$body-color: #1a2332;
+$link-color: #1f6fb2;
+$primary: #c0392b;
+$secondary: #6c7a89;
+$border-color: #d8e2ec;
+
+$font-family-sans-serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+$headings-font-weight: 700;
+$headings-color: #16202e;
+
+$navbar-bg: #101a26;
+$navbar-fg: #e8f0f8;
+$navbar-hl: #7ec8e3;
+
+$sidebar-bg: #eef4fa;
+$footer-bg: #101a26;
+$footer-fg: #b8c6d4;
+
+$input-bg: #ffffff;
+$popover-bg: #ffffff;
+
+$code-bg: rgba(16, 26, 38, 0.05);
+$code-color: #1a2332;
+
+$toc-color: #4a5a6a;
+$toc-active-border: #c0392b;
+
+$callout-note-color: #1f6fb2;
+$callout-tip-color: #1e8449;
+$callout-warning-color: #c0392b;
+
+/*-- scss:rules --*/
+
+body {
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.navbar-brand,
+.navbar-nav .nav-link {
+  transition: color 0.2s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  color: $navbar-hl !important;
+}
+
+h1, h2, h3, h4 {
+  letter-spacing: -0.01em;
+}
