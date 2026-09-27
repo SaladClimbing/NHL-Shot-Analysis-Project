@@ -1,0 +1,361 @@
+---
+title: "When the Stands Went Empty"
+author: "Andrew Lucas"
+format: html
+execute:
+  echo: false
+  message: false
+  warning: false
+---
+
+```{r}
+#| label: packages
+#| include: false
+library(data.table)
+library(ggplot2)
+```
+
+```{r}
+#| label: load-data
+#| include: false
+#| cache: true
+seasons <- 2007:2025
+files <- file.path("data", paste0("shots_", seasons, ".csv"))
+shots_raw <- rbindlist(lapply(files, function(f) {
+  fread(f, select = c("season", "game_id", "isPlayoffGame", "homeTeamWon",
+                      "event", "goal", "xGoal", "arenaAdjustedShotDistance"))
+}))
+```
+
+```{r}
+#| label: prepare-data
+#| include: false
+games <- unique(shots_raw, by = c("season", "game_id"))[
+  , .(season, game_id, isPlayoffGame, homeTeamWon)]
+
+gp <- games[isPlayoffGame == 0, .(games_played = .N), by = season][order(season)]
+
+hw <- games[isPlayoffGame == 0,
+            .(home_win_pct = 100 * mean(homeTeamWon)), by = season][order(season)]
+hw[, interrupted := season %in% c(2019, 2020)]
+
+pre_avg <- hw[season <= 2018, mean(home_win_pct)]
+long_run <- 100 * games[isPlayoffGame == 0, mean(homeTeamWon)]
+
+shots <- shots_raw[event %in% c("SHOT", "GOAL") & isPlayoffGame == 0]
+
+sc <- shots[, .(goals = sum(goal), attempts = .N), by = season]
+sc <- merge(sc, gp, by = "season")[order(season)]
+sc[, goals_per_game := goals / games_played]
+sc[, attempts_per_game := attempts / games_played]
+sc[, shoot_pct := 100 * goals / attempts]
+
+quality <- shots[, .(dist = mean(arenaAdjustedShotDistance),
+                     xg = mean(xGoal)), by = season][order(season)]
+
+ql <- melt(quality, id.vars = "season", variable.name = "metric",
+           value.name = "value")
+ql[, metric := factor(metric,
+                       levels = c("dist", "xg"),
+                       labels = c("Mean shot distance (feet)",
+                                  "Mean expected goals per shot"))]
+ql[, label_2019 := fifelse(metric == "Mean shot distance (feet)",
+                            sprintf("%.1f ft", value),
+                            sprintf("%.3f", value))]
+
+story_theme <- theme_minimal(base_size = 12) +
+  theme(
+    plot.background = element_blank(),
+    panel.background = element_blank(),
+    axis.title = element_text(color = "#555555", size = 10),
+    axis.text = element_text(color = "#555555", size = 9),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "#E4E7EB"),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+```
+
+```{r}
+#| label: stats-preview
+#| include: false
+cat("== GP (specials) ==\n")
+print(gp[season %in% c(2011:2013, 2018:2021)])
+cat("2019-20 scheduled: 1271; never played:", 1271 - gp[season == 2019, games_played], "\n\n")
+cat("== Home win % ==\n")
+print(hw[season %in% c(2011:2013, 2018:2021), .(season, pct = round(home_win_pct, 1))])
+cat("pre-pandemic avg:", round(pre_avg, 2), " long-run:", round(long_run, 1), "\n\n")
+cat("== Scoring ==\n")
+print(sc[season %in% c(2011:2014, 2018:2021),
+         .(season, gpg = round(goals_per_game, 3),
+           apg = round(attempts_per_game, 1),
+           sp = round(shoot_pct, 2))])
+cat("\n== Shot quality ==\n")
+print(quality[season %in% c(2011:2013, 2018:2022),
+              .(season, dist = round(dist, 2), xg = round(xg, 4))])
+cat("\n== Playoff GP 2019 ==\n")
+print(games[season == 2019 & isPlayoffGame == 1, .N, by = season])
+```
+
+```{=html}
+<div class="story-hook">
+<h1>On March 12, 2020, the puck stopped.</h1>
+<p>The season froze mid-stride. When it came back, the arenas were silent and the calendar looked nothing like before.</p>
+<p class="kicker">A data story about <i>2019-20</i>, <i>2020-21</i>, and what a crisis does to the record book.</p>
+</div>
+```
+
+---
+
+<div class="story-section">
+
+### Act I: The Interruption
+
+The NHL's heartbeat is a number: **1,230** regular-season games a year — later 1,271, then 1,312 as the league grew. The record book keeps the rhythm perfectly, which is exactly why the breaks stand out.
+
+Three seasons broke it. In **2012-13**, a lockout wiped out the first half of the schedule and the league squeezed 48 games into three months — just **720** in total. In **2019-20**, the season stopped on **March 12, 2020** with 1,082 of 1,271 games played: **189 games simply never happened**. When play resumed that summer, it did so inside closed bubbles in Toronto and Edmonton — 24 teams, a qualification round nobody had planned for, and a playoff that ballooned to **130 games**, more than 40 more than a typical spring.
+
+Then came **2020-21**: a 56-game schedule, division-only opponents, and **868 games** played in near-silence.
+
+</div>
+
+```{=html}
+<div class="story-figure">
+```
+
+```{r}
+#| label: chart-gp
+#| fig-width: 8
+#| fig-height: 4.5
+gp[, interrupted := season %in% c(2012, 2019, 2020)]
+gp[, note := fcase(
+  season == 2012, "720\n48-game lockout",
+  season == 2019, "1,082\nseason paused",
+  season == 2020, "868\n56 games",
+  default = NA_character_)]
+
+ggplot(gp, aes(season, games_played)) +
+  geom_col(aes(fill = interrupted), width = 0.72) +
+  geom_text(data = gp[interrupted == TRUE],
+            aes(label = note), vjust = -0.3, lineheight = 1.05,
+            color = "#C0392B", fontface = "bold", size = 3.4) +
+  scale_fill_manual(
+    values = c(`FALSE` = "#AEB6C2", `TRUE` = "#C0392B"),
+    labels = c(`FALSE` = "Full season", `TRUE` = "Interrupted season"),
+    name = NULL) +
+  scale_x_continuous(breaks = 2007:2025,
+                     expand = expansion(mult = c(0.02, 0.02))) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.22))) +
+  labs(x = "Season (start year)", y = "Regular-season games played") +
+  story_theme +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+        legend.position = "bottom")
+```
+
+```{=html}
+<p class="preview-caption">
+  Regular-season games played by season. The three interrupted seasons are highlighted.
+</p>
+</div>
+```
+
+<div class="stat-grid">
+<div class="stat-box"><div class="number">189</div><div class="label">Games Never Played (2019-20)</div></div>
+<div class="stat-box"><div class="number">130</div><div class="label">Bubble Playoff Games</div></div>
+<div class="stat-box"><div class="number">56</div><div class="label">Games per Team (2020-21)</div></div>
+</div>
+
+---
+
+<div class="story-section">
+
+### Act II: Silence in the Stands
+
+Home ice was never just a phrase. The crowd, the last change, the wear of travel — across the seasons before the pandemic, home teams won about **54.7%** of their games.
+
+So what happens when you take the crowd away? In 2019-20, half its games were played in empty buildings; in 2020-21, almost all of them. Both seasons, home teams won exactly **53.3%** of their games — a dip of nearly a point and a half from the old norm.
+
+But notice what *didn't* happen: home ice didn't disappear. The edge thinned; it didn't vanish. And the dip didn't begin with the pandemic — 2018-19 had already slipped to 53.6%. The story the data tells is quieter than the mythology: a small, persistent home advantage, slightly dented, weathering the strangest conditions the league has ever played under.
+
+</div>
+
+```{=html}
+<div class="story-figure">
+```
+
+```{r}
+#| label: chart-homewin
+#| fig-width: 8
+#| fig-height: 4.5
+hw_p <- hw[season %in% c(2019, 2020)]
+hw_p[, nx := c(-0.42, 0.42)]
+
+ggplot(hw, aes(season, home_win_pct)) +
+  geom_hline(yintercept = pre_avg, linetype = "dashed",
+             color = "#888888", linewidth = 0.7) +
+  geom_line(color = "#2980B9", linewidth = 0.9) +
+  geom_point(aes(color = interrupted), size = 2.4) +
+  geom_text(data = hw_p,
+            aes(label = paste0(round(home_win_pct, 1), "%"), x = season + nx),
+            vjust = -1.4, color = "#C0392B", fontface = "bold", size = 3.5) +
+  annotate("text", x = 2007.4, y = 57.35, hjust = 0, size = 3.4, color = "#666666",
+           label = sprintf("2007-2019 average: %.1f%%", pre_avg)) +
+  scale_color_manual(values = c(`FALSE` = "#2980B9", `TRUE` = "#C0392B"),
+                     guide = "none") +
+  scale_x_continuous(breaks = 2007:2025) +
+  scale_y_continuous(limits = c(51, 57.9), breaks = seq(51, 57, 1),
+                     labels = function(x) paste0(x, "%")) +
+  labs(x = "Season (start year)", y = "Home-team win rate") +
+  story_theme +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8))
+```
+
+```{=html}
+<p class="preview-caption">
+  Home-team win rate in the regular season. Dashed line: the 2007-2019 average.
+  The two pandemic seasons sit just below it — reduced, not erased.
+</p>
+</div>
+```
+
+---
+
+<div class="story-section">
+
+### Act III: A Different Kind of Season
+
+2020-21 hockey *felt* different. A January start, a May finish, division-only opponents, almost no travel — teams played the same handful of rivals on back-to-back nights, over and over. The scoring sagged with it: **5.79 goals per game**, down from 5.94 the year before and the lowest rate since 2016-17.
+
+The shots changed shape, too. Attempts fell to about **60 per game**, from roughly 63 a year earlier, while shooting percentage edged *up* to 9.66%. Fewer shots, slightly sharper ones, fewer goals — a grinding, defensive year produced by a schedule with no breathing room.
+
+The pause, meanwhile, interrupted offense at its peak. Through 2019-20 the league was scoring **5.94 goals a game** — the best rate in this dataset's modern era up to that point. The lights went off at the wrong moment, and when they came back on, the goals didn't come with them.
+
+</div>
+
+```{=html}
+<div class="story-figure">
+```
+
+```{r}
+#| label: chart-goals
+#| fig-width: 8
+#| fig-height: 4.5
+sc[, interrupted := season %in% c(2012, 2019, 2020)]
+sc_l <- sc[season %in% c(2012, 2019, 2020),
+           .(season, goals_per_game, interrupted,
+             vj = c(-1.3, -1.3, 2.4))]
+
+ggplot(sc, aes(season, goals_per_game)) +
+  geom_line(color = "#2980B9", linewidth = 0.9) +
+  geom_point(aes(color = interrupted), size = 2.4) +
+  geom_text(data = sc_l, aes(label = sprintf("%.2f", goals_per_game), vjust = vj),
+            color = "#C0392B", fontface = "bold", size = 3.5) +
+  scale_color_manual(values = c(`FALSE` = "#2980B9", `TRUE` = "#C0392B"),
+                     guide = "none") +
+  scale_x_continuous(breaks = 2007:2025) +
+  scale_y_continuous(limits = c(5.15, 6.55), breaks = seq(5.2, 6.4, 0.2),
+                     labels = function(x) sprintf("%.1f", x)) +
+  labs(x = "Season (start year)", y = "Goals per game (both teams)") +
+  story_theme +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8))
+```
+
+```{=html}
+<p class="preview-caption">
+  Total goals per game in the regular season. Interrupted seasons are highlighted:
+  2012-13 never moved the rate, but 2020-21 dipped.
+</p>
+</div>
+```
+
+---
+
+<div class="story-section">
+
+### Act IV: The Lesson in the Numbers
+
+Shortened seasons were not new in 2020. The lockout year of 2012-13 produced **5.30 goals per game** — wedged between 5.30 in 2011-12 and 5.33 in 2013-14. The lockout changed the calendar, not the game.
+
+The same is true of the pandemic, down at the level of the ice itself. Look at *where* shots came from: in 2019-20 the average attempt launched from **35.8 feet**, in 2020-21 from 35.1 — and their expected-goal value barely moved, 0.071 then 0.072. Both seasons sit right on the long trend line. The pandemic didn't change where shots came from. The ice stayed the ice.
+
+The real shift came *after*: by 2021-22, shots were nearly two feet closer and worth measurably more — but that is a different evolution, one the pause didn't cause.
+
+</div>
+
+```{=html}
+<div class="story-figure">
+```
+
+```{r}
+#| label: chart-quality
+#| fig-width: 8
+#| fig-height: 5.5
+ql[, interrupted := season %in% c(2012, 2019, 2020)]
+ql_l <- ql[season == 2019,
+           .(season, value, metric, interrupted, lab = label_2019)]
+
+ggplot(ql, aes(season, value)) +
+  geom_line(color = "#2980B9", linewidth = 0.9) +
+  geom_point(aes(color = interrupted), size = 2.4) +
+  geom_text(data = ql_l, aes(label = lab), vjust = -1.5,
+            color = "#C0392B", fontface = "bold", size = 3.5) +
+  scale_color_manual(values = c(`FALSE` = "#2980B9", `TRUE` = "#C0392B"),
+                     guide = "none") +
+  facet_wrap(~metric, ncol = 1, scales = "free_y") +
+  scale_x_continuous(breaks = 2007:2025) +
+  labs(x = "Season (start year)", y = NULL) +
+  story_theme +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+        strip.text = element_text(face = "bold", size = 11, color = "#444444"))
+```
+
+```{=html}
+<p class="preview-caption">
+  Where shots come from: average distance and expected-goal value of every shot
+  attempt. The pandemic seasons follow the trend; the break comes after.
+</p>
+</div>
+```
+
+<div class="story-section">
+
+So here is the rule for reading this record: **rate stats survive a crisis — counting stats don't.** Strip out 189 games and every leaderboard, point total, and save count is built on a different foundation than the seasons around it. Per-game rates hold up. When you browse the seasons in [the Exploration tab](exploration.qmd), remember that **2019** means 2019-20 and **2020** means 2020-21 — two seasons that don't play by the usual rules.
+
+</div>
+
+---
+
+<div class="stat-grid">
+<div class="stat-box"><div class="number">53.3%</div><div class="label">Home Wins, Both Seasons</div></div>
+<div class="stat-box"><div class="number">5.79</div><div class="label">Goals per Game (2020-21)</div></div>
+<div class="stat-box"><div class="number">35.1 ft</div><div class="label">Avg Shot Distance (2020-21)</div></div>
+</div>
+
+<div class="story-section">
+
+### The Takeaway
+
+What did the pandemic mean for the league? The data answers in three parts:
+
+1. **The bubble held.** 130 games played in isolation, a full playoff completed safely — the template every other sports league rushed to copy.
+2. **Home ice thinned but survived.** Empty buildings cost home teams about a point and a half of win rate — real, but far short of the edge's disappearance.
+3. **The calendar broke; the game didn't.** Goals, distances, and expected values all stayed on trend. It was the schedule — never the ice — that the crisis rearranged.
+
+And rearranged it for good: the division-only realignment invented out of necessity in 2020-21 became permanent, the revenue hole froze the salary cap for years, and the league that emerged kept a new appreciation for how much of the game lives in the numbers.
+
+</div>
+
+<div class="cta-box">
+<h3>See it for yourself.</h3>
+<p>Head to the <a href="exploration.qmd" style="font-weight:600;">Exploration page</a> and pull up seasons 2019 and 2020 alongside every other year.</p>
+</div>
+
+```{=html}
+<div class="source-note">
+  <p>
+    Shot data is sourced from <a href="https://moneypuck.com">MoneyPuck</a>.
+    Seasons are labeled by start year: <b>2019</b> = 2019-20, <b>2020</b> = 2020-21,
+    <b>2012</b> = 2012-13. Playoff game counts include the 2020 qualification and
+    round-robin rounds.
+  </p>
+</div>
+```

@@ -21,9 +21,17 @@ format: html
     <h3>The Story</h3>
     <p>A data-driven narrative exploring shot patterns, player positions, and where goals really come from.</p>
   </a>
+  <a href="pandemic.qmd" class="nav-card">
+    <h3>The Pandemic</h3>
+    <p>How the 2020 shutdown reshaped the schedule, emptied the arenas, and left its mark on the data.</p>
+  </a>
   <a href="exploration.qmd" class="nav-card">
     <h3>Explore the Data</h3>
     <p>Interactive shot maps broken down by season and player position. Filter, compare, and dig in.</p>
+  </a>
+  <a href="lockout.qmd" class="nav-card">
+    <h3>The 2012 Lockout</h3>
+    <p>The 113-day labor dispute that cut a season to 48 games — and what the shot data shows.</p>
   </a>
 </div>
 ```

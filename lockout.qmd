@@ -1,0 +1,237 @@
+---
+title: "The 2012 Lockout"
+author: "Andrew Lucas"
+format: html
+execute:
+  echo: false
+---
+
+<div class="story-hook">
+<h1>The season that almost wasn't.</h1>
+<p>113 days of labor war. 510 games erased. A 48-game sprint from January to April.</p>
+<p class="kicker">The 2012–13 NHL lockout, and what the shot data shows.</p>
+</div>
+
+---
+
+<div class="story-section">
+
+### What Happened
+
+At 11:59 p.m. on September 15, 2012, the NHL's collective bargaining agreement expired — and the owners locked out the players. It was the third lockout under commissioner Gary Bettman, and the fight was over the same fault line as always: money. Players had been taking roughly **57% of hockey-related revenue** — a pool worth about $3.3 billion a year — while owners pushed for a 50–50 divide and a tighter salary cap.
+
+The season was supposed to open on October 11. Instead, the calendar melted away. Preseason games canceled first, then regular-season games in waves, then the Winter Classic — the league's outdoor showcase — and the All-Star Weekend. In total, **510 regular-season games never happened**: 41.5% of the schedule.
+
+Talks sputtered, broke down over the winter holiday, and nearly ended in court when the union considered disclaiming interest. Then, after a 16-hour bargaining session brokered by federal mediator Scot Beckenbaugh, a tentative deal landed at 4:45 a.m. on **January 6, 2013** — 113 days after the lockout began. The new CBA split revenue 50–50, limited contract lengths, and was ratified within the week.
+
+</div>
+
+```{r}
+#| label: lockout-packages
+#| echo: false
+#| message: false
+#| warning: false
+library(data.table)
+library(ggplot2)
+```
+
+```{r}
+#| label: lockout-load-data
+#| echo: false
+#| message: false
+#| warning: false
+#| cache: true
+s11 <- fread("data/shots_2011.csv",
+             select = c("game_id", "event", "season",
+                        "isPlayoffGame", "homeTeamCode"))
+s12 <- fread("data/shots_2012.csv",
+             select = c("game_id", "event", "season",
+                        "isPlayoffGame", "homeTeamCode"))
+```
+
+```{r}
+#| label: lockout-summary
+#| echo: false
+summarize_season <- function(d, label) {
+  reg <- d[isPlayoffGame == 0]
+  data.table(
+    season_label = label,
+    games        = uniqueN(reg$game_id),
+    teams        = uniqueN(reg$homeTeamCode),
+    shots        = nrow(reg[event %in% c("SHOT", "GOAL")]),
+    goals        = nrow(reg[event == "GOAL"])
+  )
+}
+season_summary <- rbind(
+  summarize_season(s11, "2011-12"),
+  summarize_season(s12, "2012-13")
+)
+season_summary[, shots_pg := shots / games]
+season_summary[, goals_pg := goals / games]
+```
+
+```{r}
+#| label: lockout-stat-grid
+#| echo: false
+#| output: asis
+s_prev <- season_summary[season_label == "2011-12"]
+s_lock <- season_summary[season_label == "2012-13"]
+games_per_team <- round(2 * s_lock$games / s_lock$teams)
+games_cancelled <- s_prev$games - s_lock$games
+goals_pg <- sprintf("%.2f", s_lock$goals_pg)
+goals_pg_prev <- sprintf("%.2f", s_prev$goals_pg)
+
+cat(sprintf('
+<div class="stat-grid">
+<div class="stat-box"><div class="number">%d</div><div class="label">Games Per Team (vs. 82)</div></div>
+<div class="stat-box"><div class="number">%d</div><div class="label">Games Never Played</div></div>
+<div class="stat-box"><div class="number">%s</div><div class="label">Goals per Game &mdash; Unchanged from %s</div></div>
+</div>
+', games_per_team, games_cancelled, goals_pg, goals_pg_prev))
+```
+
+---
+
+<div class="story-section">
+
+### The Sprint
+
+The deal resurrected a **48-game season** that ran from January 19 to April 28, 2013 — 99 days, roughly a game every other day. With no time to waste, the league scrapped all inter-conference games to cut travel and packed the schedule with back-to-backs after a one-week training camp.
+
+The compressed chaos suited Chicago. The Blackhawks opened the season with 24 consecutive games without a regulation loss — an NHL record — and went on to win the Cup in June. The rest of the league simply tried to survive the treadmill.
+
+</div>
+
+---
+
+<div class="story-section">
+
+### By the Numbers
+
+What did half a season do to the way the game was played? Almost nothing, at least per game. The shortened season produced **58.3 shots per game** versus **59.5** the year before — a 2% dip — and scoring was essentially frozen at **5.30 goals per game** in both seasons.
+
+The lockout cut the *quantity* of hockey, not its character. Rate stats — the ones that describe how a game actually looks — shrugged off the disruption entirely.
+
+</div>
+
+```{=html}
+<div class="section-label">
+<h2 style="font-size:1.3rem; margin-bottom:0.5rem;">Pace Held, Volume Vanished</h2>
+```
+
+```{r}
+#| label: lockout-plot-pace
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 4.6
+plot_df <- melt(season_summary,
+                id.vars = "season_label",
+                measure.vars = c("shots_pg", "goals_pg"),
+                variable.name = "metric",
+                value.name = "value")
+plot_df[, metric := factor(metric,
+                           levels = c("shots_pg", "goals_pg"),
+                           labels = c("Shots per Game", "Goals per Game"))]
+
+ggplot(plot_df, aes(x = season_label, y = value, fill = season_label)) +
+  geom_col(width = 0.55) +
+  geom_text(aes(label = sprintf("%.1f", value)),
+            vjust = -0.5, size = 4.5, fontface = "bold") +
+  facet_wrap(~ metric, scales = "free_y", nrow = 1) +
+  scale_fill_manual(values = c("2011-12" = "#3498DB", "2012-13" = "#C0392B")) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.12))) +
+  labs(title = "Per-Game Pace Barely Flinched",
+       subtitle = "Regular season, 2011-12 vs. lockout-shortened 2012-13",
+       x = NULL, y = NULL) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+    plot.subtitle = element_text(hjust = 0.5, color = "grey40", size = 11),
+    strip.text = element_text(face = "bold", size = 12),
+    panel.grid.major.x = element_blank(),
+    axis.text = element_text(size = 11)
+  )
+```
+
+```{=html}
+<p class="preview-caption">
+  Shot and goal rates per game, computed from the MoneyPuck shot data.
+</p>
+</div>
+
+```{=html}
+<div class="section-label">
+<h2 style="font-size:1.3rem; margin-bottom:0.5rem;">The Deepest Dip in 19 Seasons</h2>
+```
+
+```{r}
+#| label: lockout-load-games-by-season
+#| echo: false
+#| message: false
+#| warning: false
+#| cache: true
+games_by_season <- rbindlist(lapply(sprintf("data/shots_%d.csv", 2007:2025), function(f) {
+  d <- fread(f, select = c("game_id", "isPlayoffGame", "season"))
+  reg <- d[isPlayoffGame == 0]
+  data.table(season = reg$season[1], games = uniqueN(reg$game_id))
+}))
+games_by_season[, highlight := season == 2012]
+```
+
+```{r}
+#| label: lockout-plot-context
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 4.6
+ggplot(games_by_season, aes(x = factor(season), y = games, fill = highlight)) +
+  geom_col(width = 0.7) +
+  geom_text(data = games_by_season[highlight == TRUE],
+            aes(label = games), vjust = -0.5,
+            size = 4.5, fontface = "bold", color = "#C0392B") +
+  scale_fill_manual(values = c("TRUE" = "#C0392B", "FALSE" = "#AEB6BF"),
+                    guide = "none") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  labs(title = "Regular-Season Games Played, 2007–2025",
+       subtitle = "The lockout cost 510 games; only the COVID seasons come close",
+       x = NULL, y = NULL) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+    plot.subtitle = element_text(hjust = 0.5, color = "grey40", size = 11),
+    panel.grid.major.x = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+    axis.text.y = element_text(size = 10)
+  )
+```
+
+```{=html}
+<p class="preview-caption">
+  Regular-season games per season from the shot data. The 2019-20 and 2020-21 dips are COVID-shortened seasons.
+  <a href="exploration.qmd">Compare seasons interactively &rarr;</a>
+</p>
+</div>
+```
+
+---
+
+<div class="story-section">
+
+### The Takeaway
+
+1. **The calendar shrank; the game didn't.** Shot and goal rates per game were nearly identical on either side of the lockout.
+2. **Half the sample.** Any comparison involving 2012-13 rests on 720 games instead of 1,230 — read raw totals carefully.
+3. **Only a pandemic matched it.** Across 19 seasons, only the COVID interruptions produced a comparable hole in the schedule.
+
+The ice didn't change when the lawyers left the room. Hockey, it turns out, is remarkably resistant to interruptions — as long as there are still games to play.
+
+</div>
+
+<div class="cta-box">
+<h3>See it for yourself.</h3>
+<p>Head to the <a href="exploration.qmd" style="font-weight:600;">Exploration page</a> and select season 2012 to explore the shortened year.</p>
+</div>

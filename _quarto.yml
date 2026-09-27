@@ -9,8 +9,14 @@ website:
         text: Home
       - href: story.qmd
         text: Story
+      - href: pandemic.qmd
+        text: Pandemic
       - href: exploration.qmd
         text: Exploration
+      - href: lockout.qmd
+        text: 2012 Lockout
+      - href: about.qmd
+        text: About
 
 format:
   html:

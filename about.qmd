@@ -1,0 +1,35 @@
+---
+title: "About"
+author: "Andrew Lucas"
+format: html
+---
+
+<div class="story-hook">
+<h1>Andrew Lucas</h1>
+<p>Computer Science, Class of 2028 &mdash; New College of Florida</p>
+</div>
+
+---
+
+<div class="story-section">
+
+### Contact
+
+<ul class="contact-list">
+  <li><strong>Email</strong> — <a href="mailto:a.lucas28@ncf.edu">a.lucas28@ncf.edu</a></li>
+  <li><strong>GitHub</strong> — <a href="https://github.com/SaladClimbing">@SaladClimbing</a></li>
+  <li><strong>Project repo</strong> — <a href="https://github.com/SaladClimbing/NHL-Shot-Analysis-Project">SaladClimbing/NHL-Shot-Analysis-Project</a></li>
+  <li><strong>School</strong> — <a href="https://www.ncf.edu">New College of Florida</a></li>
+</ul>
+
+</div>
+
+---
+
+<div class="story-section">
+
+### Data Source
+
+Shot data is sourced from [MoneyPuck](https://moneypuck.com), which publishes NHL play-by-play-derived statistics for public and educational use. The dataset covers every shot attempt — goals, shots on goal, missed shots, and blocked shots — for seasons 2007 through 2025, with arena-adjusted rink coordinates so every rink lines up on the same axis. Downloads and full documentation are available on the [MoneyPuck data page](https://moneypuck.com/data.htm).
+
+</div>
