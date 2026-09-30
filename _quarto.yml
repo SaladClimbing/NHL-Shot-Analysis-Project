@@ -7,12 +7,12 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - href: story.qmd
-        text: Story
+      - href: findings.qmd
+        text: Key Findings
+      - href: exploration.qmd
+        text: Shots by Season
       - href: pandemic.qmd
         text: Pandemic
-      - href: exploration.qmd
-        text: Exploration
       - href: lockout.qmd
         text: 2012 Lockout
       - href: about.qmd

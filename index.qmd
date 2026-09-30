@@ -1,6 +1,5 @@
 ---
-title: "NHL Shot Position Analysis"
-author: "Andrew Lucas"
+toc: false
 format: html
 ---
 
@@ -17,8 +16,8 @@ format: html
 
 ```{=html}
 <div class="nav-cards">
-  <a href="story.qmd" class="nav-card">
-    <h3>The Story</h3>
+  <a href="findings.qmd" class="nav-card">
+    <h3>Key Findings</h3>
     <p>A data-driven narrative exploring shot patterns, player positions, and where goals really come from.</p>
   </a>
   <a href="pandemic.qmd" class="nav-card">
