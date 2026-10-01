@@ -1,0 +1,324 @@
+---
+format: html
+execute:
+  echo: false
+  message: false
+  warning: false
+---
+
+```{r}
+#| label: packages
+#| include: false
+library(data.table)
+library(ggplot2)
+library(hexbin)
+source("R/rink.R")
+```
+
+```{r}
+#| label: load-data
+#| include: false
+#| cache: true
+seasons <- 2007:2025
+files <- file.path("data", paste0("shots_", seasons, ".csv"))
+shots_raw <- rbindlist(lapply(files, function(f) {
+  fread(f, select = c("event", "goal", "season",
+                      "arenaAdjustedXCord", "arenaAdjustedXCordABS",
+                      "arenaAdjustedYCord", "arenaAdjustedShotDistance",
+                      "playerPositionThatDidEvent"))
+}))
+```
+
+```{r}
+#| label: prepare-data
+#| include: false
+shots <- shots_raw[event %in% c("SHOT", "GOAL", "MISS")]
+
+# Fold every shot onto one attacking end (net at x = 89). The y coordinate
+# stays signed so left/right side of the ice remains visible.
+shots[, arenaAdjustedXCord := arenaAdjustedXCordABS]
+
+shots[, position_label := factor(fcase(
+  playerPositionThatDidEvent == "C", "Center",
+  playerPositionThatDidEvent == "D", "Defense",
+  playerPositionThatDidEvent == "L", "Left Wing",
+  playerPositionThatDidEvent == "R", "Right Wing"
+), levels = c("Center", "Defense", "Left Wing", "Right Wing"))]
+
+shots[, dist_bucket := cut(arenaAdjustedShotDistance,
+                           breaks = c(-Inf, 10, 20, 30, 40, 50, Inf),
+                           labels = c("<10 ft", "10-20 ft", "20-30 ft",
+                                      "30-40 ft", "40-50 ft", "50+ ft"))]
+
+skaters <- shots[!is.na(position_label)]
+
+story_theme <- theme_minimal(base_size = 12) +
+  theme(
+    plot.background = element_blank(),
+    panel.background = element_blank(),
+    axis.title = element_text(color = "#555555", size = 10),
+    axis.text = element_text(color = "#555555", size = 9),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "#E4E7EB"),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+```
+
+```{r}
+#| label: stats-preview
+#| include: false
+cat("attempts:", nrow(shots), " goals:", sum(shots$goal),
+    " seasons:", uniqueN(shots$season), "\n")
+slot <- shots$arenaAdjustedXCord > 60 & abs(shots$arenaAdjustedYCord) < 20
+cat("slot attempts share:", round(100 * mean(slot), 1),
+    " slot goals share:", round(100 * sum(shots$goal[slot]) / sum(shots$goal), 1), "\n")
+print(shots[, .(attempts = .N, goals = sum(goal), pct = round(100 * mean(goal), 2)),
+            by = dist_bucket][order(dist_bucket)])
+print(skaters[, .(attempts = .N,
+                  mean_dist = round(mean(arenaAdjustedShotDistance), 1),
+                  pct = round(100 * mean(goal), 2)),
+              by = position_label][order(position_label)])
+```
+
+<section class="story-hook">
+<h1>Every game, hundreds of pucks fly toward the net.</h1>
+<p>But only some of them come from <em>dangerous</em> places.</p>
+<p class="kicker">A data story across <i>19</i> NHL seasons.</p>
+</section>
+
+---
+
+<div class="story-section">
+
+### The Question
+
+Since 2007, over **2 million shot attempts** have been fired across the NHL. Some found the back of the net. Most didn't. The data doesn't lie — it maps out exactly where offense lives on the ice, and where it dies.
+
+Where do the goals actually come from?
+
+</div>
+
+<div class="stat-grid">
+<div class="stat-box"><div class="number">2M+</div><div class="label">Total Shots</div></div>
+<div class="stat-box"><div class="number">~140K</div><div class="label">Goals Scored</div></div>
+<div class="stat-box"><div class="number">19</div><div class="label">Seasons Analyzed</div></div>
+</div>
+
+---
+
+<div class="story-section">
+
+### Act I: The Big Picture
+
+Zoom out. Every shot from every season, folded onto a single attacking end and overlaid on one rink. The bright spots reveal the **hot zones** — the areas where offense concentrates.
+
+The glow is brightest between the faceoff circles, just above the goal line. This is **the slot** — the most dangerous real estate in hockey. The closer you are to the net, the more likely you are to score.
+
+But not all players operate in the same neighborhoods.
+
+</div>
+
+```{=html}
+<div class="story-figure">
+```
+
+```{r}
+#| label: chart-overview
+#| fig-width: 8
+#| fig-height: 6
+density_plot(shots, bins = 45, legend_name = "Attempts per hex",
+             title = "Every shot attempt, 2007-2025",
+             xlim = c(0, 100))
+```
+
+```{=html}
+<p class="preview-caption">
+  All 2.08 million shot attempts (shots, misses, and goals) from 19 seasons,
+  folded onto a single attacking end. Brightest hexes sit in the slot, between
+  the faceoff circles and above the goal line.
+</p>
+</div>
+```
+
+---
+
+<div class="story-section">
+
+### Act II: The Cast of Characters
+
+Every position has its own shooting identity — but the real divide runs between forwards and defensemen.
+
+**Centers** own the slot. They lurk in the high-traffic corridor right in front of the net, reading the play, waiting for the pass, and pouncing on loose pucks. About half of every center's attempts come from inside the slot, and their heatmap is a concentrated glow right in the heart of the offensive zone.
+
+**Left Wings** and **Right Wings** play the same game. Strip the names off the panels and their heatmaps are nearly indistinguishable from the centers': the same neighborhoods, the same 30-foot average, the same 8% scoring rate. Mirror one wing's map onto the other and they line up — there is no left side or right side of the ice here, just forwards camping on the same dangerous ground.
+
+**Defensemen** shoot from everywhere — but especially from the point, near the blue line. Their job isn't always to score. It's to get pucks through traffic, create rebounds, and keep plays alive. Their shots come from about 20 feet farther out — nearly 50 feet on average — from wider angles, from places where goals are rare but chaos is abundant. They score on barely 3.5% of their attempts.
+
+Every position plays a different game, but only two games are being played. The ice is not one story — it's two.
+
+</div>
+
+```{=html}
+<div class="story-figure">
+```
+
+```{r}
+#| label: chart-positions
+#| fig-width: 8
+#| fig-height: 6.5
+density_share_plot(skaters, bins = 35, facet = "position_label",
+                   legend_name = "Share of that\nposition's attempts",
+                   title = "Where each position shoots from",
+                   xlim = c(0, 100), ylim = c(-44, 44))
+```
+
+```{=html}
+<p class="preview-caption">
+  Each panel shows that position's own shot attempts as a share of its total,
+  so the shapes are comparable across positions. Centers and both wings crowd
+  the slot; defensemen load up at the point. The two wing maps are almost
+  identical — forwards play one game, defensemen play another.
+</p>
+</div>
+```
+
+```{=html}
+<div class="story-figure">
+```
+
+```{r}
+#| label: chart-position-dist
+#| fig-width: 8
+#| fig-height: 4.4
+pos_sum <- skaters[, .(attempts = .N,
+                       mean_dist = mean(arenaAdjustedShotDistance),
+                       pct = 100 * mean(goal)),
+                   by = position_label]
+
+ggplot(pos_sum, aes(position_label, mean_dist, fill = position_label)) +
+  geom_col(width = 0.62) +
+  geom_text(aes(label = sprintf("%.0f ft\n%.1f%% score", mean_dist, pct)),
+            vjust = -0.35, lineheight = 1.05, fontface = "bold",
+            size = 3.6, color = "#444444") +
+  scale_fill_manual(values = pos_colors, guide = "none") +
+  scale_y_continuous(limits = c(0, 64), expand = expansion(mult = c(0, 0.02))) +
+  labs(x = NULL, y = "Average distance per attempt (feet)") +
+  story_theme
+```
+
+```{=html}
+<p class="preview-caption">
+  Average shot distance by position, with each position's scoring rate.
+  Defensemen fire from roughly 20 feet farther out — and score on fewer than
+  half as many of their attempts as forwards do.
+</p>
+</div>
+```
+
+---
+
+<div class="story-section">
+
+### Act III: The Goal Line
+
+Not all shots are created equal. A blast from the blue line and a tap-in from the crease are both "shots" — but they don't score at the same rate.
+
+The data makes this brutally clear. **Shot density** spreads across the entire offensive zone — wide, diffuse, hopeful. **Goal density** collapses into a tight cluster right in front of the net. The gap between where shots come from and where goals happen is the gap between hope and results.
+
+Distance kills scoring chances. From the blue line, hundreds of shots yield almost no goals. From the crease, almost every shot is dangerous. The ice has a geography, and the goalies know it — but the shooters do, too.
+
+</div>
+
+```{=html}
+<div class="story-figure">
+```
+
+```{r}
+#| label: chart-shot-goal
+#| fig-width: 8
+#| fig-height: 5.5
+sg <- copy(shots)
+sg[, panel := factor(fcase(
+  event == "GOAL", "Where goals come from",
+  default = "Where attempts come from"
+), levels = c("Where attempts come from", "Where goals come from"))]
+
+density_share_plot(sg, bins = 40, facet = "panel",
+                   legend_name = "Share of panel total",
+                   title = "Attempts versus goals",
+                   xlim = c(0, 100), ylim = c(-44, 44))
+```
+
+```{=html}
+<p class="preview-caption">
+  Left: every attempt as a share of all attempts. Right: every goal as a share
+  of all goals — same color scale. Attempts smear across the whole zone; goals
+  collapse into the slot. The slot holds 38.7% of attempts but 68.9% of goals.
+</p>
+</div>
+```
+
+```{=html}
+<div class="story-figure">
+```
+
+```{r}
+#| label: chart-distance-pct
+#| fig-width: 8
+#| fig-height: 4.6
+dist_sum <- shots[, .(attempts = .N, goals = sum(goal)), by = dist_bucket]
+dist_sum <- dist_sum[!is.na(dist_bucket)][order(dist_bucket)]
+dist_sum[, pct := 100 * goals / attempts]
+
+ggplot(dist_sum, aes(dist_bucket, pct)) +
+  geom_col(fill = "#C0392B", width = 0.65) +
+  geom_text(aes(label = scales::comma(attempts), y = 2.2),
+            color = "white", vjust = 1.2, fontface = "bold", size = 3.3) +
+  geom_text(aes(label = sprintf("%.1f%%", pct)), vjust = -0.7,
+            fontface = "bold", size = 4, color = "#444444") +
+  scale_y_continuous(limits = c(0, 19), expand = expansion(mult = c(0, 0.04))) +
+  labs(x = "Distance from the net", y = "Share of attempts that score") +
+  story_theme
+```
+
+```{=html}
+<p class="preview-caption">
+  Scoring rate by shot distance across 19 seasons, with attempt counts inside
+  each bar. Inside 10 feet, one in six attempts scores; from 50+ feet, it takes
+  nearly 45 attempts for a goal.
+</p>
+</div>
+```
+
+---
+
+<div class="story-section">
+
+### The Takeaway
+
+The NHL is a game of angles and inches. This data tells a clear story:
+
+1. **The slot is king.** The area between the faceoff circles is where games are won.
+2. **Position dictates opportunity.** Forwards camp in the slot and score on roughly 8% of their attempts. Defensemen create from a distance — 20 feet farther out, for about half the reward.
+3. **Proximity = probability.** Every foot closer to the net dramatically increases your chance of scoring.
+
+The ice surface hasn't changed in a century. But how teams use it — that's the game within the game.
+
+</div>
+
+<div class="cta-box">
+<h3>Ready to dig deeper?</h3>
+<p>Head to the <a href="exploration.qmd" style="font-weight:600;">Exploration page</a> to filter by season, position, and more.</p>
+</div>
+
+```{=html}
+<div class="source-note">
+  <p>
+    Shot data is sourced from <a href="https://moneypuck.com">MoneyPuck</a> and
+    covers all shot attempts (shots on goal, missed shots, and goals) from
+    2007-2025. Both ends of the rink are folded onto one attacking end, with the
+    net at x = 89. Scoring rate = goals divided by attempts.
+  </p>
+</div>
+```
+
