@@ -1,6 +1,5 @@
 ---
 title: "When the Stands Went Empty"
-author: "Andrew Lucas"
 format: html
 execute:
   echo: false
@@ -97,11 +96,11 @@ print(games[season == 2019 & isPlayoffGame == 1, .N, by = season])
 ```
 
 ```{=html}
-<div class="story-hook">
+<section class="story-hook">
 <h1>On March 12, 2020, the puck stopped.</h1>
 <p>The season froze mid-stride. When it came back, the arenas were silent and the calendar looked nothing like before.</p>
 <p class="kicker">A data story about <i>2019-20</i>, <i>2020-21</i>, and what a crisis does to the record book.</p>
-</div>
+</section>
 ```
 
 ---
@@ -198,7 +197,7 @@ ggplot(hw, aes(season, home_win_pct)) +
             aes(label = paste0(round(home_win_pct, 1), "%"), x = season + nx),
             vjust = -1.4, color = "#C0392B", fontface = "bold", size = 3.5) +
   annotate("text", x = 2007.4, y = 57.35, hjust = 0, size = 3.4, color = "#666666",
-           label = sprintf("2007-2019 average: %.1f%%", pre_avg)) +
+           label = sprintf("2007-2018 average: %.1f%%", pre_avg)) +
   scale_color_manual(values = c(`FALSE` = "#2980B9", `TRUE` = "#C0392B"),
                      guide = "none") +
   scale_x_continuous(breaks = 2007:2025) +
@@ -211,7 +210,7 @@ ggplot(hw, aes(season, home_win_pct)) +
 
 ```{=html}
 <p class="preview-caption">
-  Home-team win rate in the regular season. Dashed line: the 2007-2019 average.
+  Home-team win rate in the regular season. Dashed line: the 2007-2018 average.
   The two pandemic seasons sit just below it — reduced, not erased.
 </p>
 </div>
@@ -277,7 +276,7 @@ Shortened seasons were not new in 2020. The lockout year of 2012-13 produced **5
 
 The same is true of the pandemic, down at the level of the ice itself. Look at *where* shots came from: in 2019-20 the average attempt launched from **35.8 feet**, in 2020-21 from 35.1 — and their expected-goal value barely moved, 0.071 then 0.072. Both seasons sit right on the long trend line. The pandemic didn't change where shots came from. The ice stayed the ice.
 
-The real shift came *after*: by 2021-22, shots were nearly two feet closer and worth measurably more — but that is a different evolution, one the pause didn't cause.
+The real shift came *after*: by 2021-22, shots were more than a foot closer and worth measurably more — but that is a different evolution, one the pause didn't cause.
 
 </div>
 

@@ -4,14 +4,14 @@ format: html
 ---
 
 ```{=html}
-<div class="welcome">
+<section class="welcome">
 <h1>NHL Shot Position Analysis</h1>
 <p>
   Where do NHL shots come from, and what makes a shot dangerous?
   This project explores over 2 million shot attempts across 19 seasons (2007–2025)
   to find out.
 </p>
-</div>
+</section>
 ```
 
 ```{=html}
@@ -158,7 +158,7 @@ ggplot() +
 <div class="source-note">
   <p>
     Shot data is sourced from <a href="https://moneypuck.com">MoneyPuck</a> and includes
-    all shot attempts (shots on goal, missed shots, blocked shots) as well as goals.
+    all shot attempts (shots on goal and missed shots) as well as goals.
     Positions covered: Center, Defense, Left Wing, and Right Wing.
   </p>
 </div>

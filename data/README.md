@@ -14,7 +14,7 @@ Data downloaded from MoneyPuck for educational use.
 
 ## Dataset Overview
 
-This dataset contains shot-level data from the National Hockey League (NHL) for the 2007-2024 seasons. Each row represents a shot event (including goals, misses, and blocked shots) with detailed contextual information such as player identities, ice conditions, and expected goal probabilities. The data is sourced from MoneyPuck and includes precomputed expected goal (xG) metrics.
+This dataset contains shot-level data from the National Hockey League (NHL) for the 2007-2025 seasons. Each row represents a shot event (including goals and misses) with detailed contextual information such as player identities, ice conditions, and expected goal probabilities. The data is sourced from MoneyPuck and includes precomputed expected goal (xG) metrics.
 
 ## Data Dictionary
 
@@ -34,7 +34,7 @@ This dataset contains shot-level data from the National Hockey League (NHL) for 
 | `period` | Period number (1-4 for regulation, 5 for OT, 6 for SO) |
 | `team` | Team that initiated the event (HOME or AWAY) |
 | `location` | Zone where the event occurred (HOMEZONE, AWAYZONE, NEUTRALZONE) |
-| `event` | Event type (SHOT, MISS, GOAL, FACEOFF, HIT, GIVE, TAKE, BLOCK, etc.) |
+| `event` | Event type (SHOT, MISS, GOAL) |
 | `goal` | 1 if the shot resulted in a goal, 0 otherwise |
 | `shotPlayContinuedOutsideZone` | 1 if play continued outside the zone after the shot |
 | `shotPlayContinuedInZone` | 1 if play continued in the zone after the shot |
@@ -73,7 +73,7 @@ This dataset contains shot-level data from the National Hockey League (NHL) for 
 | `awayPenalty1Length` | Length (seconds) of the first away penalty |
 | `homePenalty1TimeLeft` | Time remaining (seconds) on the first home penalty |
 | `homePenalty1Length` | Length (seconds) of the first home penalty |
-| `playerPositionThatDidEvent` | Position of the player who initiated the event (F, D, G) |
+| `playerPositionThatDidEvent` | Position of the player who initiated the event (C, L, R, D, G) |
 | `playerNumThatDidEvent` | Jersey number of the player who initiated the event |
 | `playerNumThatDidLastEvent` | Jersey number of the player who initiated the previous event |
 | `lastEventxCord_adjusted` | Adjusted x-coordinate of the previous event |

@@ -1,6 +1,5 @@
 ---
 title: "About"
-author: "Andrew Lucas"
 format: html
 ---
 
@@ -30,6 +29,6 @@ format: html
 
 ### Data Source
 
-Shot data is sourced from [MoneyPuck](https://moneypuck.com), which publishes NHL play-by-play-derived statistics for public and educational use. The dataset covers every shot attempt — goals, shots on goal, missed shots, and blocked shots — for seasons 2007 through 2025, with arena-adjusted rink coordinates so every rink lines up on the same axis. Downloads and full documentation are available on the [MoneyPuck data page](https://moneypuck.com/data.htm).
+Shot data is sourced from [MoneyPuck](https://moneypuck.com), which publishes NHL play-by-play-derived statistics for public and educational use. The dataset covers every shot attempt — goals, shots on goal, and missed shots — for seasons 2007 through 2025, with arena-adjusted rink coordinates so every rink lines up on the same axis. Downloads and full documentation are available on the [MoneyPuck data page](https://moneypuck.com/data.htm).
 
 </div>

@@ -1,16 +1,15 @@
 ---
 title: "The 2012 Lockout"
-author: "Andrew Lucas"
 format: html
 execute:
   echo: false
 ---
 
-<div class="story-hook">
+<section class="story-hook">
 <h1>The season that almost wasn't.</h1>
 <p>113 days of labor war. 510 games erased. A 48-game sprint from January to April.</p>
 <p class="kicker">The 2012–13 NHL lockout, and what the shot data shows.</p>
-</div>
+</section>
 
 ---
 

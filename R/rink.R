@@ -60,13 +60,14 @@ rink_lines <- function() {
 hex_colours <- c("#FFFFCC", "#FED976", "#FD8D3C", "#E31A1C", "#BD0026", "#800026")
 
 density_plot <- function(data, bins = 42, legend_name = "Shots per hex",
-                         title = NULL) {
+                         title = NULL, xlim = c(-100, 100),
+                         ylim = c(-44, 44)) {
   ggplot(data, aes(arenaAdjustedXCord, arenaAdjustedYCord)) +
     rink_base() +
     stat_binhex(bins = bins, na.rm = TRUE) +
     scale_fill_gradientn(colours = hex_colours, name = legend_name) +
     rink_lines() +
-    coord_equal(xlim = c(-100, 100), ylim = c(-44, 44)) +
+    coord_equal(xlim = xlim, ylim = ylim) +
     labs(title = title, x = NULL, y = NULL) +
     theme_void() +
     theme(
@@ -77,4 +78,36 @@ density_plot <- function(data, bins = 42, legend_name = "Shots per hex",
       strip.text = element_text(face = "bold", size = 12, margin = margin(t = 6, b = 2)),
       plot.margin = margin(10, 10, 10, 10)
     )
+}
+
+# Hex map where fill = share of that panel's own shots (stat_binhex's density),
+# so panels with very different shot volumes stay comparable by shape. Pass
+# `facet` (a column name) to split into panels.
+density_share_plot <- function(data, bins = 40, facet = NULL,
+                               legend_name = "Share of shots",
+                               title = NULL, xlim = c(-100, 100),
+                               ylim = c(-44, 44)) {
+  p <- ggplot(data, aes(arenaAdjustedXCord, arenaAdjustedYCord)) +
+    rink_base() +
+    stat_binhex(bins = bins, na.rm = TRUE,
+                aes(fill = after_stat(density))) +
+    scale_fill_gradientn(colours = hex_colours, name = legend_name,
+                         labels = scales::percent_format(accuracy = 0.1)) +
+    rink_lines() +
+    coord_equal(xlim = xlim, ylim = ylim) +
+    labs(title = title, x = NULL, y = NULL) +
+    theme_void() +
+    theme(
+      plot.title = element_text(size = 15, face = "bold", hjust = 0.5,
+                                margin = margin(b = 6)),
+      legend.title = element_text(size = 11),
+      legend.text = element_text(size = 10),
+      strip.text = element_text(face = "bold", size = 12, margin = margin(t = 6, b = 2)),
+      plot.margin = margin(10, 10, 10, 10)
+    )
+
+  if (!is.null(facet)) {
+    p <- p + facet_wrap(as.formula(paste("~", facet)), ncol = 2)
+  }
+  p
 }

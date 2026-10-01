@@ -1,12 +1,10 @@
 ---
-title: "Exploration"
-author: "Andrew Lucas"
+title: "Explore NHL Shot Data by Season"
 format: html
 execute:
   echo: false
+toc: false
 ---
-
-## Explore NHL Shot Data by Season
 
 Dive into 19 seasons of NHL shot data (2007–2025). Select a season from the dropdown to see where shots originate on the ice for that year. The **heatmap** shows shot density — brighter areas mean more shots come from there. The **scatter points** show individual shot locations, colored by player position.
 
@@ -17,7 +15,7 @@ Dive into 19 seasons of NHL shot data (2007–2025). Select a season from the dr
 - **Hover** — Hover over any point or heatmap cell for details.
 
 ::: {.callout-note}
-Shot data is sourced from MoneyPuck and includes all shot attempts (shots on goal, missed shots, and blocked shots) as well as goals. Positions shown are Center, Defense, Left Wing, and Right Wing.
+Shot data is sourced from MoneyPuck and includes all shot attempts (shots on goal and missed shots) as well as goals. Positions shown are Center, Defense, Left Wing, and Right Wing.
 :::
 
 ```{r}

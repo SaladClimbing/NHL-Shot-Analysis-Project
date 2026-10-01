@@ -181,3 +181,8 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* Quarto injects an empty title-block header when a page has no title */
+#title-block-header:empty {
+  display: none;
+}
