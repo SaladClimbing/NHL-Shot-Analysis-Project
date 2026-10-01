@@ -6,7 +6,6 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Andrew Lucas">
 
 <title>The 2012 Lockout – NHL Shot Position Analysis</title>
 <style>
@@ -276,16 +275,16 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./story.html"> 
-<span class="menu-text">Story</span></a>
+    <a class="nav-link" href="./findings.html"> 
+<span class="menu-text">Key Findings</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./exploration.html"> 
+<span class="menu-text">Shots by Season</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./pandemic.html"> 
 <span class="menu-text">Pandemic</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./exploration.html"> 
-<span class="menu-text">Exploration</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link active" href="./lockout.html" aria-current="page"> 
@@ -332,12 +331,6 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Andrew Lucas </p>
-          </div>
-  </div>
     
   
     
@@ -348,7 +341,7 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="story-hook">
+<section class="story-hook">
 <h1>
 The season that almost wasn’t.
 </h1>
@@ -358,7 +351,7 @@ The season that almost wasn’t.
 <p class="kicker">
 The 2012–13 NHL lockout, and what the shot data shows.
 </p>
-</div>
+</section>
 <hr>
 <section id="what-happened" class="level3 story-section">
 <h3 class="anchored" data-anchor-id="what-happened">What Happened</h3>
@@ -545,7 +538,7 @@ Head to the <a href="./exploration.html" style="font-weight:600;">Exploration pa
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/SaladClimbing\.github\.io\/NHL-Shot-Analysis-Project\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

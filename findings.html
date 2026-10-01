@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Andrew Lucas">
 
-<title>Where Do NHL Goals Come From? – NHL Shot Position Analysis</title>
+<title>findings – NHL Shot Position Analysis</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -276,16 +275,16 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./story.html" aria-current="page"> 
-<span class="menu-text">Story</span></a>
+    <a class="nav-link active" href="./findings.html" aria-current="page"> 
+<span class="menu-text">Key Findings</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./exploration.html"> 
+<span class="menu-text">Shots by Season</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./pandemic.html"> 
 <span class="menu-text">Pandemic</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./exploration.html"> 
-<span class="menu-text">Exploration</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./lockout.html"> 
@@ -321,35 +320,13 @@ ul.task-list li input[type="checkbox"] {
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Where Do NHL Goals Come From?</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
-
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Andrew Lucas </p>
-          </div>
-  </div>
-    
-  
-    
-  </div>
-  
 
 
-</header>
-
-
-<div class="story-hook">
+<section class="story-hook">
 <h1>
 Every game, hundreds of pucks fly toward the net.
 </h1>
@@ -359,7 +336,7 @@ But only some of them come from <em>dangerous</em> places.
 <p class="kicker">
 A data story across <i>19</i> NHL seasons.
 </p>
-</div>
+</section>
 <hr>
 <section id="the-question" class="level3 story-section">
 <h3 class="anchored" data-anchor-id="the-question">The Question</h3>
@@ -377,7 +354,7 @@ Total Shots
 </div>
 <div class="stat-box">
 <div class="number">
-~150K
+~140K
 </div>
 <div class="label">
 Goals Scored
@@ -395,19 +372,68 @@ Seasons Analyzed
 <hr>
 <section id="act-i-the-big-picture" class="level3 story-section">
 <h3 class="anchored" data-anchor-id="act-i-the-big-picture">Act I: The Big Picture</h3>
-<p>Zoom out. Every shot on the ice, from every season, overlaid on a single rink. The bright spots reveal the <strong>hot zones</strong> — the areas where offense concentrates.</p>
+<p>Zoom out. Every shot from every season, folded onto a single attacking end and overlaid on one rink. The bright spots reveal the <strong>hot zones</strong> — the areas where offense concentrates.</p>
 <p>The glow is brightest between the faceoff circles, just above the goal line. This is <strong>the slot</strong> — the most dangerous real estate in hockey. The closer you are to the net, the more likely you are to score.</p>
 <p>But not all players operate in the same neighborhoods.</p>
 </section>
+<div class="story-figure">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="findings_files/figure-html/chart-overview-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p class="preview-caption">
+  All 2.08 million shot attempts (shots, misses, and goals) from 19 seasons,
+  folded onto a single attacking end. Brightest hexes sit in the slot, between
+  the faceoff circles and above the goal line.
+</p>
+</div>
 <hr>
 <section id="act-ii-the-cast-of-characters" class="level3 story-section">
 <h3 class="anchored" data-anchor-id="act-ii-the-cast-of-characters">Act II: The Cast of Characters</h3>
-<p>Every position has its own shooting identity.</p>
-<p><strong>Centers</strong> own the slot. They lurk in the high-traffic corridor right in front of the net, reading the play, waiting for the pass, and pouncing on loose pucks. Their heatmap is a concentrated glow right in the heart of the offensive zone.</p>
-<p><strong>Defensemen</strong> shoot from everywhere — but especially from the point, near the blue line. Their job isn’t always to score. It’s to get pucks through traffic, create rebounds, and keep plays alive. Their shots come from further out, from wider angles, from places where goals are rare but chaos is abundant.</p>
-<p><strong>Left Wings</strong> and <strong>Right Wings</strong> work the edges. They patrol the faceoff circles and the half-boards, looking for shooting lanes that the centers and defensemen can’t find. Their footprints are asymmetric — each wing favoring their side of the ice, carving out their own territory.</p>
-<p>Every position plays a different game. The ice is not one story — it’s four.</p>
+<p>Every position has its own shooting identity — but the real divide runs between forwards and defensemen.</p>
+<p><strong>Centers</strong> own the slot. They lurk in the high-traffic corridor right in front of the net, reading the play, waiting for the pass, and pouncing on loose pucks. About half of every center’s attempts come from inside the slot, and their heatmap is a concentrated glow right in the heart of the offensive zone.</p>
+<p><strong>Left Wings</strong> and <strong>Right Wings</strong> play the same game. Strip the names off the panels and their heatmaps are nearly indistinguishable from the centers’: the same neighborhoods, the same 30-foot average, the same 8% scoring rate. Mirror one wing’s map onto the other and they line up — there is no left side or right side of the ice here, just forwards camping on the same dangerous ground.</p>
+<p><strong>Defensemen</strong> shoot from everywhere — but especially from the point, near the blue line. Their job isn’t always to score. It’s to get pucks through traffic, create rebounds, and keep plays alive. Their shots come from about 20 feet farther out — nearly 50 feet on average — from wider angles, from places where goals are rare but chaos is abundant. They score on barely 3.5% of their attempts.</p>
+<p>Every position plays a different game, but only two games are being played. The ice is not one story — it’s two.</p>
 </section>
+<div class="story-figure">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="findings_files/figure-html/chart-positions-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p class="preview-caption">
+  Each panel shows that position's own shot attempts as a share of its total,
+  so the shapes are comparable across positions. Centers and both wings crowd
+  the slot; defensemen load up at the point. The two wing maps are almost
+  identical — forwards play one game, defensemen play another.
+</p>
+</div>
+<div class="story-figure">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="findings_files/figure-html/chart-position-dist-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p class="preview-caption">
+  Average shot distance by position, with each position's scoring rate.
+  Defensemen fire from roughly 20 feet farther out — and score on fewer than
+  half as many of their attempts as forwards do.
+</p>
+</div>
 <hr>
 <section id="act-iii-the-goal-line" class="level3 story-section">
 <h3 class="anchored" data-anchor-id="act-iii-the-goal-line">Act III: The Goal Line</h3>
@@ -415,13 +441,45 @@ Seasons Analyzed
 <p>The data makes this brutally clear. <strong>Shot density</strong> spreads across the entire offensive zone — wide, diffuse, hopeful. <strong>Goal density</strong> collapses into a tight cluster right in front of the net. The gap between where shots come from and where goals happen is the gap between hope and results.</p>
 <p>Distance kills scoring chances. From the blue line, hundreds of shots yield almost no goals. From the crease, almost every shot is dangerous. The ice has a geography, and the goalies know it — but the shooters do, too.</p>
 </section>
+<div class="story-figure">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="findings_files/figure-html/chart-shot-goal-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p class="preview-caption">
+  Left: every attempt as a share of all attempts. Right: every goal as a share
+  of all goals — same color scale. Attempts smear across the whole zone; goals
+  collapse into the slot. The slot holds 38.7% of attempts but 68.9% of goals.
+</p>
+</div>
+<div class="story-figure">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="findings_files/figure-html/chart-distance-pct-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p class="preview-caption">
+  Scoring rate by shot distance across 19 seasons, with attempt counts inside
+  each bar. Inside 10 feet, one in six attempts scores; from 50+ feet, it takes
+  nearly 45 attempts for a goal.
+</p>
+</div>
 <hr>
 <section id="the-takeaway" class="level3 story-section">
 <h3 class="anchored" data-anchor-id="the-takeaway">The Takeaway</h3>
 <p>The NHL is a game of angles and inches. This data tells a clear story:</p>
 <ol type="1">
 <li><strong>The slot is king.</strong> The area between the faceoff circles is where games are won.</li>
-<li><strong>Position dictates opportunity.</strong> Centers get the best looks. Defensemen create from a distance. Wingers find edges.</li>
+<li><strong>Position dictates opportunity.</strong> Forwards camp in the slot and score on roughly 8% of their attempts. Defensemen create from a distance — 20 feet farther out, for about half the reward.</li>
 <li><strong>Proximity = probability.</strong> Every foot closer to the net dramatically increases your chance of scoring.</li>
 </ol>
 <p>The ice surface hasn’t changed in a century. But how teams use it — that’s the game within the game.</p>
@@ -433,6 +491,14 @@ Ready to dig deeper?
 <p>
 Head to the <a href="./exploration.html" style="font-weight:600;">Exploration page</a> to filter by season, position, and more.
 </p>
+</div>
+<div class="source-note">
+  <p>
+    Shot data is sourced from <a href="https://moneypuck.com">MoneyPuck</a> and
+    covers all shot attempts (shots on goal, missed shots, and goals) from
+    2007-2025. Both ends of the rink are folded onto one attacking end, with the
+    net at x = 89. Scoring rate = goals divided by attempts.
+  </p>
 </div>
 
 
@@ -524,7 +590,7 @@ Head to the <a href="./exploration.html" style="font-weight:600;">Exploration pa
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/SaladClimbing\.github\.io\/NHL-Shot-Analysis-Project\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

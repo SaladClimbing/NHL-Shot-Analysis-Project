@@ -6,7 +6,6 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Andrew Lucas">
 
 <title>NHL Shot Position Analysis</title>
 <style>
@@ -83,7 +82,7 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -276,16 +275,16 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./story.html"> 
-<span class="menu-text">Story</span></a>
+    <a class="nav-link" href="./findings.html"> 
+<span class="menu-text">Key Findings</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./exploration.html"> 
+<span class="menu-text">Shots by Season</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./pandemic.html"> 
 <span class="menu-text">Pandemic</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./exploration.html"> 
-<span class="menu-text">Exploration</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./lockout.html"> 
@@ -307,49 +306,25 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
-    </div>
+    
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">NHL Shot Position Analysis</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
-
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Andrew Lucas </p>
-          </div>
-  </div>
-    
-  
-    
-  </div>
-  
 
 
-</header>
-
-
-<div class="welcome">
+<section class="welcome">
 <h1>NHL Shot Position Analysis</h1>
 <p>
   Where do NHL shots come from, and what makes a shot dangerous?
   This project explores over 2 million shot attempts across 19 seasons (2007–2025)
   to find out.
 </p>
-</div>
+</section>
 <div class="nav-cards">
-  <a href="./story.html" class="nav-card">
-    <h3 class="anchored">The Story</h3>
+  <a href="./findings.html" class="nav-card">
+    <h3 class="anchored">Key Findings</h3>
     <p>A data-driven narrative exploring shot patterns, player positions, and where goals really come from.</p>
   </a>
   <a href="./pandemic.html" class="nav-card">
@@ -384,7 +359,7 @@ ul.task-list li input[type="checkbox"] {
 <div class="source-note">
   <p>
     Shot data is sourced from <a href="https://moneypuck.com">MoneyPuck</a> and includes
-    all shot attempts (shots on goal, missed shots, blocked shots) as well as goals.
+    all shot attempts (shots on goal and missed shots) as well as goals.
     Positions covered: Center, Defense, Left Wing, and Right Wing.
   </p>
 </div>
@@ -478,7 +453,7 @@ ul.task-list li input[type="checkbox"] {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/SaladClimbing\.github\.io\/NHL-Shot-Analysis-Project\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

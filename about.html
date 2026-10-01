@@ -6,7 +6,6 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Andrew Lucas">
 
 <title>About – NHL Shot Position Analysis</title>
 <style>
@@ -276,16 +275,16 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./story.html"> 
-<span class="menu-text">Story</span></a>
+    <a class="nav-link" href="./findings.html"> 
+<span class="menu-text">Key Findings</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./exploration.html"> 
+<span class="menu-text">Shots by Season</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./pandemic.html"> 
 <span class="menu-text">Pandemic</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./exploration.html"> 
-<span class="menu-text">Exploration</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./lockout.html"> 
@@ -330,12 +329,6 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Andrew Lucas </p>
-          </div>
-  </div>
     
   
     
@@ -375,7 +368,7 @@ Computer Science, Class of 2028 — New College of Florida
 <hr>
 <section id="data-source" class="level3 story-section">
 <h3 class="anchored" data-anchor-id="data-source">Data Source</h3>
-<p>Shot data is sourced from <a href="https://moneypuck.com">MoneyPuck</a>, which publishes NHL play-by-play-derived statistics for public and educational use. The dataset covers every shot attempt — goals, shots on goal, missed shots, and blocked shots — for seasons 2007 through 2025, with arena-adjusted rink coordinates so every rink lines up on the same axis. Downloads and full documentation are available on the <a href="https://moneypuck.com/data.htm">MoneyPuck data page</a>.</p>
+<p>Shot data is sourced from <a href="https://moneypuck.com">MoneyPuck</a>, which publishes NHL play-by-play-derived statistics for public and educational use. The dataset covers every shot attempt — goals, shots on goal, and missed shots — for seasons 2007 through 2025, with arena-adjusted rink coordinates so every rink lines up on the same axis. Downloads and full documentation are available on the <a href="https://moneypuck.com/data.htm">MoneyPuck data page</a>.</p>
 </section>
 
 
@@ -467,7 +460,7 @@ Computer Science, Class of 2028 — New College of Florida
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/SaladClimbing\.github\.io\/NHL-Shot-Analysis-Project\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
